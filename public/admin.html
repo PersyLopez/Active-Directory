@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin | Small Biz Template</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .field{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+    textarea{min-height:120px}
+    .row{display:flex;gap:8px;align-items:center}
+    .table{width:100%;border-collapse:separate;border-spacing:0 8px}
+    .table td,.table th{padding:8px 10px}
+    .table tr{background:var(--color-card);border:1px solid rgba(148,163,184,0.12)}
+    .table tr>td:first-child,.table tr>th:first-child{border-radius:10px 0 0 10px}
+    .table tr>td:last-child,.table tr>th:last-child{border-radius:0 10px 10px 0}
+    input,select,textarea{background:#0f1b2d;color:var(--color-text);border:1px solid #334155;border-radius:10px;padding:10px}
+    label{font-size:.9rem;color:var(--color-muted)}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Admin</h1>
+    <p class="muted">Edit site content, pages, and products. Changes update <code>data/site.json</code>.</p>
+
+    <div class="card">
+      <div class="row">
+        <input id="token" placeholder="Admin token (from .env)" style="flex:1" />
+        <button class="btn btn-secondary" id="load">Load</button>
+        <button class="btn btn-primary" id="save">Save</button>
+      </div>
+    </div>
+
+    <div class="admin-grid mt-4">
+      <div class="card">
+        <h2 class="section-title">Pages</h2>
+        <table class="table" id="pages-table">
+          <thead>
+            <tr><th>Slug</th><th>Title</th><th>Actions</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="row mt-3">
+          <input id="newPageSlug" placeholder="slug (e.g. faq)" />
+          <input id="newPageTitle" placeholder="Page title" />
+          <button class="btn btn-secondary" id="addPage">Add Page</button>
+        </div>
+        <div class="field">
+          <label for="pageBody">Selected page body (Markdown)</label>
+          <textarea id="pageBody" placeholder="# Heading\nWrite content... (basic Markdown)"></textarea>
+          <div class="row"><button class="btn btn-primary" id="updatePage">Update Page</button><span class="muted" id="pageStatus"></span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Products</h2>
+        <table class="table" id="products-table">
+          <thead>
+            <tr><th>Name</th><th>Price</th><th>Actions</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="row mt-3">
+          <input id="newProdName" placeholder="Product name" />
+          <input id="newProdPrice" type="number" placeholder="Price" />
+          <button class="btn btn-secondary" id="addProd">Add Product</button>
+        </div>
+        <div class="field">
+          <label for="prodDesc">Selected product description</label>
+          <textarea id="prodDesc" placeholder="Describe the product"></textarea>
+          <div class="row"><button class="btn btn-primary" id="updateProd">Update Product</button><span class="muted" id="prodStatus"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./admin.js"></script>
+</body>
+</html>

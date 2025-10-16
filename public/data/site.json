@@ -78,4 +78,14 @@
     "phone": "+1-555-123-4567"
   },
   "footer": { "text": "© GreenLeaf Services. All rights reserved." }
+  ,
+  "pages": [
+    { "slug": "about-us", "title": "About Us", "body": "We started in 2018 with a mission to help local businesses." },
+    { "slug": "faq", "title": "FAQ", "body": "Q: How fast?\nA: Usually within 1-2 weeks." }
+  ],
+  "products": [
+    { "name": "Starter Website", "price": 399, "description": "A one-page site tailored to your brand." },
+    { "name": "SEO Boost", "price": 249, "description": "On-page SEO setup and optimization." },
+    { "name": "Growth Package", "price": 799, "description": "Website + marketing setup for 3 months." }
+  ]
 }

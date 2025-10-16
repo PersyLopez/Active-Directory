@@ -28,7 +28,14 @@
     if(cfg.brand?.logo){ brandLogo.src = cfg.brand.logo; brandLogo.alt = cfg.brand.alt || cfg.brand.name || 'Logo'; }
 
     navLinks.innerHTML = '';
-    (cfg.nav || []).forEach(item =>{
+    const dynamicNav = [...(cfg.nav || [])];
+    if(Array.isArray(cfg.pages) && cfg.pages.length){
+      dynamicNav.push({ label: 'Pages', href: '#pages' });
+    }
+    if(Array.isArray(cfg.products) && cfg.products.length){
+      dynamicNav.push({ label: 'Products', href: '#products' });
+    }
+    dynamicNav.forEach(item =>{
       const li = document.createElement('li');
       const a = document.createElement('a');
       a.href = item.href || '#';
@@ -173,7 +180,51 @@
     renderTestimonials(cfg);
     renderPricing(cfg);
     renderContact(cfg);
+    renderPages(cfg);
+    renderProducts(cfg);
     renderFooter(cfg);
+  }
+
+  function renderPages(cfg){
+    if(!Array.isArray(cfg.pages) || cfg.pages.length === 0) return;
+    const sec = sectionWrapper('pages');
+    const container = sec.firstChild;
+    container.appendChild(el('h2', { class:'section-title' }, ['Pages']));
+    const grid = el('div', { class:'grid-2' }, cfg.pages.map(p => el('div', { class:'card' }, [
+      el('h3', {}, [p.title || p.slug || 'Page']),
+      renderMarkdown(p.body || '')
+    ])));
+    container.appendChild(grid);
+    document.getElementById('content').appendChild(sec);
+  }
+
+  function renderProducts(cfg){
+    if(!Array.isArray(cfg.products) || cfg.products.length === 0) return;
+    const sec = sectionWrapper('products');
+    const container = sec.firstChild;
+    container.appendChild(el('h2', { class:'section-title' }, ['Products']));
+    const grid = el('div', { class:'grid-3' }, cfg.products.map(prod => el('div', { class:'card' }, [
+      el('h3', {}, [prod.name || 'Product']),
+      prod.price != null ? el('p', { class:'mt-2' }, [`$${prod.price}`]) : null,
+      renderMarkdown(prod.description || '')
+    ])));
+    container.appendChild(grid);
+    document.getElementById('content').appendChild(sec);
+  }
+
+  function renderMarkdown(md){
+    // extremely small markdown subset: headings (#, ##), bold (**), italics (_), line breaks
+    if(!md) return el('p', {}, ['']);
+    let html = md
+      .replace(/^###\s?(.*)$/gm, '<h4>$1</h4>')
+      .replace(/^##\s?(.*)$/gm, '<h3>$1</h3>')
+      .replace(/^#\s?(.*)$/gm, '<h2>$1</h2>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/_(.*?)_/g, '<em>$1</em>')
+      .replace(/\n/g, '<br/>');
+    const wrapper = el('div', { class:'mt-2' });
+    wrapper.innerHTML = html;
+    return wrapper;
   }
 
   try{
