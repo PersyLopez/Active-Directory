@@ -31,6 +31,7 @@ export function Home() {
           <div style={{ display: 'flex', gap: 8 }}>
             <Link to="/pages">Pages</Link>
             <Link to="/canvas">Canvas</Link>
+            <Link to="/graph">Graph</Link>
           </div>
         </div>
         <button onClick={() => createNote('Untitled')}>New Note</button>
