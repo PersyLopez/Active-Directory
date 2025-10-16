@@ -1,0 +1,81 @@
+{
+  "brand": {
+    "name": "GreenLeaf Services",
+    "logo": "assets/logo.svg",
+    "alt": "GreenLeaf logo"
+  },
+  "nav": [
+    { "label": "Home", "href": "#hero" },
+    { "label": "Services", "href": "#services" },
+    { "label": "About", "href": "#about" },
+    { "label": "Testimonials", "href": "#testimonials" },
+    { "label": "Pricing", "href": "#pricing" },
+    { "label": "Contact", "href": "#contact" }
+  ],
+  "themeVars": {
+    "color-primary": "#22c55e",
+    "color-primary-600": "#16a34a"
+  },
+  "hero": {
+    "eyebrow": "Eco-friendly solutions",
+    "title": "Grow your small business with confidence",
+    "subtitle": "A modern, fast template you can customize in minutes.",
+    "image": "assets/hero-placeholder.svg",
+    "imageAlt": "Happy small business owner",
+    "cta": [
+      { "label": "Get Started", "href": "#contact" },
+      { "label": "See Pricing", "href": "#pricing", "variant": "secondary" }
+    ]
+  },
+  "services": {
+    "title": "What we do",
+    "subtitle": "Flexible offerings to fit your business",
+    "items": [
+      { "title": "Consulting", "description": "Hands-on guidance for strategy and operations." },
+      { "title": "Web Design", "description": "Clean, responsive websites that convert." },
+      { "title": "Marketing", "description": "Campaigns that reach your ideal customers." }
+    ]
+  },
+  "about": {
+    "title": "About GreenLeaf",
+    "body": "We help small businesses thrive with practical, sustainable solutions. Our team brings decades of combined experience in design, operations, and growth."
+  },
+  "testimonials": {
+    "title": "What clients say",
+    "items": [
+      { "quote": "They transformed our online presence—sales up 40%.", "author": "Amira, Shop Owner" },
+      { "quote": "Professional, friendly, and fast.", "author": "Luis, Contractor" },
+      { "quote": "The best investment we made this year.", "author": "Priya, Consultant" }
+    ]
+  },
+  "pricing": {
+    "title": "Simple pricing",
+    "plans": [
+      {
+        "name": "Starter",
+        "description": "Great for new businesses",
+        "price": 199,
+        "cta": { "label": "Choose Starter", "href": "#contact" }
+      },
+      {
+        "name": "Growth",
+        "description": "For growing teams",
+        "price": 499,
+        "cta": { "label": "Choose Growth", "href": "#contact" }
+      },
+      {
+        "name": "Pro",
+        "description": "For established brands",
+        "price": 999,
+        "cta": { "label": "Choose Pro", "href": "#contact" }
+      }
+    ]
+  },
+  "contact": {
+    "title": "Get in touch",
+    "subtitle": "We usually reply within one business day.",
+    "email": "hello@example.com",
+    "phone": "+1-555-123-4567"
+  },
+  "footer": { "text": "© GreenLeaf Services. All rights reserved." }
+}

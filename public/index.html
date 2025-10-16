@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Small Business Website Template</title>
+    <meta name="description" content="A clean, customizable small business website template." />
+
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+
+    <header class="site-header" id="top">
+      <div class="container header-inner">
+        <a href="#top" class="brand" aria-label="Home">
+          <img id="brand-logo" class="brand-logo" src="assets/logo.svg" alt="" />
+          <span id="brand-name" class="brand-name">Your Business</span>
+        </a>
+
+        <button class="nav-toggle" id="nav-toggle" aria-controls="site-nav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+
+        <nav class="site-nav" id="site-nav" aria-label="Primary">
+          <ul id="nav-links" class="nav-links"></ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="content" class="site-main" tabindex="-1">
+      <!-- Sections will be rendered here by app.js using data/site.json -->
+      <noscript>
+        <div class="container">
+          <p>This template requires JavaScript to render content from <code>data/site.json</code>. Please enable JavaScript.</p>
+        </div>
+      </noscript>
+    </main>
+
+    <footer class="site-footer" id="site-footer">
+      <div class="container" id="footer-content"></div>
+    </footer>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>
