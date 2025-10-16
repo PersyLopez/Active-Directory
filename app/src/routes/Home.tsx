@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useVault } from '../vault/VaultContext'
 import { extractWikilinks, buildBacklinks, slugify } from '../vault/Wikilink'
+import { insertWikilinkBySearch } from '../editor/DoubleClickConcept'
 import CodeMirror from '@uiw/react-codemirror'
 import { markdown } from '@codemirror/lang-markdown'
 
@@ -27,7 +28,10 @@ export function Home() {
       <aside style={{ borderRight: '1px solid #eee', padding: 12 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3>Notes</h3>
-          <Link to="/canvas">Canvas →</Link>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Link to="/pages">Pages</Link>
+            <Link to="/canvas">Canvas</Link>
+          </div>
         </div>
         <button onClick={() => createNote('Untitled')}>New Note</button>
         <ul>
@@ -48,6 +52,15 @@ export function Home() {
             height="80vh"
             extensions={[markdown()]}
             onChange={val => saveNote({ ...selected, content: val }).catch(err => alert(err.message))}
+            onDoubleClick={async () => {
+              const sel = window.getSelection()
+              if (!sel || sel.rangeCount === 0) return
+              const selectedText = sel.toString()
+              if (!selectedText) return
+              const updated = insertWikilinkBySearch(selected.content, selectedText)
+              if (!updated) return
+              await saveNote({ ...selected, content: updated })
+            }}
           />
         )}
       </main>
