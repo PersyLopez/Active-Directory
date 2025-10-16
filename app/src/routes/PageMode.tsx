@@ -28,9 +28,31 @@ export function PageMode() {
     }
   }, [size, margins])
 
+  function handlePrint() {
+    const paper = size === 'A4' ? 'A4' : 'letter'
+    const printCss = `
+@page { size: ${paper}; margin: 0; }
+@media print {
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: white; }
+  .pm-toolbar { display: none !important; }
+  .pm-page { box-shadow: none !important; margin: 0 auto !important; width: auto !important; min-height: auto !important; }
+}
+`
+    const el = document.createElement('style')
+    el.setAttribute('data-print', 'page-mode')
+    el.textContent = printCss
+    document.head.appendChild(el)
+    const cleanup = () => {
+      el.remove()
+      window.removeEventListener('afterprint', cleanup)
+    }
+    window.addEventListener('afterprint', cleanup)
+    window.print()
+  }
+
   return (
     <div style={{ padding: 16 }}>
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
+      <div className="pm-toolbar" style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
         <label>
           Size
           <select value={size} onChange={e => setSize(e.target.value as keyof typeof PAGE_SIZES)}>
@@ -41,9 +63,10 @@ export function PageMode() {
             ))}
           </select>
         </label>
+        <button onClick={handlePrint}>Export PDF (Print)</button>
       </div>
       {note ? (
-        <div style={style.page}>
+        <div className="pm-page" style={style.page}>
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{note.content}</ReactMarkdown>
         </div>
       ) : (
