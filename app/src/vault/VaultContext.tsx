@@ -40,24 +40,50 @@ async function readFileHandleText(fileHandle: FileSystemFileHandle): Promise<str
   return await file.text()
 }
 
-async function* iterateDirectory(
+async function listMarkdownNotes(
   dir: FileSystemDirectoryHandle,
-): AsyncGenerator<FileSystemHandle, void, unknown> {
+  prefix: string = '',
+): Promise<Note[]> {
+  const notes: Note[] = []
   const anyDir = dir as unknown as {
     entries?: () => AsyncIterableIterator<[string, FileSystemHandle]>
-    values?: () => AsyncIterableIterator<FileSystemHandle>
   }
-  if (typeof anyDir.entries === 'function') {
-    for await (const [, handle] of anyDir.entries()) {
-      yield handle as FileSystemHandle
+  if (!anyDir.entries) return notes
+  for await (const [name, handle] of anyDir.entries()) {
+    if (handle.kind === 'file') {
+      const fileHandle = handle as FileSystemFileHandle
+      if (name.toLowerCase().endsWith('.md')) {
+        const content = await readFileHandleText(fileHandle)
+        const relPath = `${prefix}${name}`
+        const title = name.replace(/\.md$/i, '')
+        notes.push({
+          id: slugify(relPath.replace(/\.md$/i, '')),
+          title,
+          path: relPath,
+          content,
+          updatedAt: Date.now(),
+        })
+      }
+    } else if (handle.kind === 'directory') {
+      const subdir = handle as FileSystemDirectoryHandle
+      const sub = await listMarkdownNotes(subdir, `${prefix}${name}/`)
+      notes.push(...sub)
     }
-    return
   }
-  if (typeof anyDir.values === 'function') {
-    for await (const handle of anyDir.values()) {
-      yield handle as FileSystemHandle
-    }
+  return notes
+}
+
+async function getOrCreateFileHandleByPath(
+  root: FileSystemDirectoryHandle,
+  path: string,
+): Promise<FileSystemFileHandle> {
+  const segments = path.split('/').filter(Boolean)
+  const fileName = segments.pop() as string
+  let dir = root
+  for (const seg of segments) {
+    dir = await dir.getDirectoryHandle(seg, { create: true })
   }
+  return await dir.getFileHandle(fileName, { create: true })
 }
 
 export function VaultProvider({ children }: PropsWithChildren) {
@@ -74,8 +100,8 @@ export function VaultProvider({ children }: PropsWithChildren) {
   const saveNoteInternal = useCallback(async (note: Note): Promise<Note> => {
     const next: Note = { ...note, updatedAt: Date.now() }
     if (state.kind === 'fs' && fsRoot) {
-      // Stage 1: write to top-level file in root
-      const fileHandle = await fsRoot.getFileHandle(note.path, { create: true })
+      // Ensure directory path exists then write
+      const fileHandle = await getOrCreateFileHandleByPath(fsRoot, note.path)
       const writable = await fileHandle.createWritable()
       await writable.write(next.content)
       await writable.close()
@@ -93,24 +119,8 @@ export function VaultProvider({ children }: PropsWithChildren) {
     const root = await picker()
     setFsRoot(root)
 
-    const notes: Note[] = []
-    // Read top-level .md files (Stage 1: no recursion)
-    for await (const entry of iterateDirectory(root)) {
-      if (entry.kind === 'file') {
-        const fileHandle = entry as FileSystemFileHandle
-        if (fileHandle.name.toLowerCase().endsWith('.md')) {
-          const content = await readFileHandleText(fileHandle)
-          const title = fileHandle.name.replace(/\.md$/i, '')
-          notes.push({
-            id: slugify(title),
-            title,
-            path: fileHandle.name,
-            content,
-            updatedAt: Date.now(),
-          })
-        }
-      }
-    }
+    // Recursively collect markdown notes
+    const notes = await listMarkdownNotes(root)
     setState({ notes, isOpen: true, kind: 'fs' })
   }, [])
 
