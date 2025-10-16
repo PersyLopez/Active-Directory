@@ -1,7 +1,15 @@
+import { useMemo, useState } from 'react'
 import { useVault } from '../vault/VaultContext'
+import { extractWikilinks, buildBacklinks, slugify } from '../vault/Wikilink'
+import CodeMirror from '@uiw/react-codemirror'
+import { markdown } from '@codemirror/lang-markdown'
 
 export function Home() {
   const { state, openWithFsAccess, openInMemory, createNote, saveNote } = useVault()
+  const [selectedId, setSelectedId] = useState<string | null>(state.notes[0]?.id ?? null)
+  const selected = state.notes.find(n => n.id === selectedId) ?? state.notes[0]
+  const backlinks = useMemo(() => buildBacklinks(state.notes), [state.notes])
+  const incoming = selected ? backlinks[slugify(selected.title)] ?? [] : []
 
   if (!state.isOpen) {
     return (
@@ -14,28 +22,50 @@ export function Home() {
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', height: '100dvh' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr 280px', height: '100dvh' }}>
       <aside style={{ borderRight: '1px solid #eee', padding: 12 }}>
         <h3>Notes</h3>
         <button onClick={() => createNote('Untitled')}>New Note</button>
         <ul>
           {state.notes.map(n => (
-            <li key={n.id}>{n.title}</li>
+            <li key={n.id}>
+              <button onClick={() => setSelectedId(n.id)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                {n.title}
+              </button>
+            </li>
           ))}
         </ul>
       </aside>
       <main style={{ padding: 16 }}>
-        <h3>Editor (placeholder)</h3>
-        {state.notes[0] && (
-          <textarea
-            style={{ width: '100%', height: '80vh' }}
-            value={state.notes[0].content}
-            onChange={e =>
-              saveNote({ ...state.notes[0], content: e.target.value }).catch(err => alert(err.message))
-            }
+        <h3>Editor</h3>
+        {selected && (
+          <CodeMirror
+            value={selected.content}
+            height="80vh"
+            extensions={[markdown()]}
+            onChange={val => saveNote({ ...selected, content: val }).catch(err => alert(err.message))}
           />
         )}
       </main>
+      <aside style={{ borderLeft: '1px solid #eee', padding: 12 }}>
+        <h3>Backlinks</h3>
+        {selected && incoming.length === 0 && <div>No backlinks</div>}
+        <ul>
+          {incoming.map(id => {
+            const note = state.notes.find(n => n.id === id)
+            if (!note) return null
+            const links = extractWikilinks(note.content).filter(l => slugify(l.target) === slugify(selected.title))
+            return (
+              <li key={id}>
+                <button onClick={() => setSelectedId(id)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                  {note.title}
+                </button>
+                <div style={{ color: '#666', fontSize: 12 }}>{links[0]?.text}</div>
+              </li>
+            )
+          })}
+        </ul>
+      </aside>
     </div>
   )
 }
