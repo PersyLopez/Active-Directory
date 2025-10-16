@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useVault } from '../vault/VaultContext'
 import { extractWikilinks, buildBacklinks, slugify } from '../vault/Wikilink'
 import CodeMirror from '@uiw/react-codemirror'
@@ -24,7 +25,10 @@ export function Home() {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr 280px', height: '100dvh' }}>
       <aside style={{ borderRight: '1px solid #eee', padding: 12 }}>
-        <h3>Notes</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3>Notes</h3>
+          <Link to="/canvas">Canvas →</Link>
+        </div>
         <button onClick={() => createNote('Untitled')}>New Note</button>
         <ul>
           {state.notes.map(n => (
