@@ -211,6 +211,18 @@ export function CanvasPage() {
             <input type="color" defaultValue={getStored('canvas:color', '#1f2937')} onChange={e => setStrokeColor(e.target.value)} />
           </label>
         </div>
+        {/* Grid */}
+        <div style={{ display: 'inline-flex', gap: 6, marginLeft: 12, alignItems: 'center' }}>
+          <span>Grid:</span>
+          <select defaultValue={getStored('canvas:grid', 'off')} onChange={e => setGrid(e.target.value)}>
+            <option value="off">Off</option>
+            <option value="dots-8">Dots 8</option>
+            <option value="dots-16">Dots 16</option>
+            <option value="lines-16">Lines 16</option>
+            <option value="lines-32">Lines 32</option>
+            <option value="isometric-16">Isometric 16</option>
+          </select>
+        </div>
         {/* Presets */}
         <div style={{ display: 'inline-flex', gap: 6, marginLeft: 12, alignItems: 'center' }}>
           <span>Presets:</span>
@@ -285,6 +297,27 @@ function setStrokeColor(color: string) {
   const e = editor as { setStyleForNextShapes?: (style: any, value: any, opts?: any) => void } | null
   const schema = (window as any).tldraw?.tlschema
   if (e?.setStyleForNextShapes && schema) e.setStyleForNextShapes(schema.DefaultColorStyle, color)
+}
+
+function setGrid(value: string) {
+  try { localStorage.setItem('canvas:grid', value) } catch {}
+  const editor = (window as any).app?.editor as
+    | (Editor & { updateDocumentSettings?: (settings: any) => void })
+    | undefined
+  if (!editor) return
+  // Base grid size; TLDraw shows dots by default when gridSize > 0
+  const applySize = (size: number) => editor.updateDocumentSettings?.({ gridSize: size })
+
+  if (value === 'off') applySize(0)
+  else if (value === 'dots-8') applySize(8)
+  else if (value === 'dots-16') applySize(16)
+  else if (value === 'lines-16') applySize(16)
+  else if (value === 'lines-32') applySize(32)
+  else if (value === 'isometric-16') applySize(16)
+
+  // Visual style via CSS variables overlay
+  const root = document.documentElement
+  root.style.setProperty('--grid-mode', value)
 }
 
 function applyPreset(name: 'HB' | '2B' | 'Highlighter') {

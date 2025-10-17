@@ -43,6 +43,50 @@ body {
   -webkit-touch-callout: none;
 }
 
+/* Grid overlay styles */
+.tl-grid {
+  /* default color already defined by tldraw; we tweak opacity a bit */
+  opacity: 0.9;
+}
+
+/* Simulate line / isometric grids using background when selected */
+/* We can't change TLDraw's internal dot grid directly, so add an overlay */
+.tl-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 149; /* slightly below tl-grid default 150 to not block */
+  background: none;
+}
+
+/* Lines 16 */
+:root[style*="--grid-mode:lines-16"] .tl-container::before {
+  background-image: linear-gradient(to right, rgba(0,0,0,0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,0,0,0.08) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Lines 32 */
+:root[style*="--grid-mode:lines-32"] .tl-container::before {
+  background-image: linear-gradient(to right, rgba(0,0,0,0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,0,0,0.08) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Isometric 16 */
+:root[style*="--grid-mode:isometric-16"] .tl-container::before {
+  background-image: linear-gradient(30deg, rgba(0,0,0,0.06) 1px, transparent 1px),
+    linear-gradient(150deg, rgba(0,0,0,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+  background-size: 16px 28px, 16px 28px, 16px 16px;
+}
+
+/* Off - clear overlay */
+:root[style*="--grid-mode:off"] .tl-container::before {
+  background: none;
+}
+
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
