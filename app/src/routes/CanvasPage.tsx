@@ -26,6 +26,22 @@ export function CanvasPage() {
 
   function handleMount(editor: Editor) {
     editorRef.current = editor
+    // Restore style preferences
+    try {
+      const storedColor = localStorage.getItem('canvas:color')
+      const storedSize = localStorage.getItem('canvas:size')
+      const e = editor as unknown as {
+        setStyleForNextShapes?: (style: any, value: any, opts?: any) => void
+      }
+      // Access @tldraw/tlschema styles via window bundle (runtime, avoids direct type import)
+      const schema = (window as any).tldraw?.tlschema
+      if (e.setStyleForNextShapes && schema) {
+        if (storedColor) e.setStyleForNextShapes(schema.DefaultColorStyle, storedColor)
+        if (storedSize) e.setStyleForNextShapes(schema.DefaultSizeStyle, storedSize)
+      }
+    } catch {
+      // ignore
+    }
   }
 
   async function exportPng() {
@@ -75,6 +91,9 @@ export function CanvasPage() {
       if (!editor) return
       const setTool = editor.setCurrentTool ?? editor.setCurrentToolId
       if (!setTool) return
+      // Don't override if user has explicitly selected a non-draw/hand tool recently
+      const explicit = getStored('canvas:explicitTool', '')
+      if (explicit && explicit !== 'draw' && explicit !== 'hand') return
       if (e.pointerType === 'pen') setTool('draw')
       else if (e.pointerType === 'touch') setTool('hand')
     }
@@ -144,6 +163,30 @@ export function CanvasPage() {
       <div style={{ padding: 8, borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', gap: 8 }}>
         <button onClick={exportPng}>Export PNG</button>
         <button onClick={ingestFromGraph} style={{ marginLeft: 8 }}>Ingest from Graph</button>
+        {/* Tools */}
+        <div style={{ display: 'inline-flex', gap: 4, marginLeft: 12 }}>
+          <ToolBtn id="select" label="Select" />
+          <ToolBtn id="hand" label="Hand" />
+          <ToolBtn id="draw" label="Pencil" />
+          <ToolBtn id="highlight" label="Highlighter" />
+          <ToolBtn id="eraser" label="Eraser" />
+        </div>
+        {/* Styles */}
+        <div style={{ display: 'inline-flex', gap: 6, marginLeft: 12, alignItems: 'center' }}>
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            Width
+            <select onChange={e => setStrokeSize(e.target.value as any)} defaultValue={getStored('canvas:size', 'm')}>
+              <option value="s">S</option>
+              <option value="m">M</option>
+              <option value="l">L</option>
+              <option value="xl">XL</option>
+            </select>
+          </label>
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            Color
+            <input type="color" defaultValue={getStored('canvas:color', '#1f2937')} onChange={e => setStrokeColor(e.target.value)} />
+          </label>
+        </div>
         <label style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
           <input
             type="checkbox"
@@ -166,4 +209,41 @@ export function CanvasPage() {
       </div>
     </div>
   )
+}
+
+function getStored(key: string, fallback: string) {
+  try {
+    return localStorage.getItem(key) ?? fallback
+  } catch {
+    return fallback
+  }
+}
+
+function ToolBtn(props: { id: string; label: string }) {
+  const { id, label } = props
+  function selectTool() {
+    const editor = (window as any).app?.editor || (document.querySelector('.tl-container') as any)?.__editor
+    const e = editor as { setCurrentTool?: (id: string) => void } | null
+    e?.setCurrentTool?.(id)
+    try { localStorage.setItem('canvas:explicitTool', id) } catch {}
+  }
+  return (
+    <button onClick={selectTool}>{label}</button>
+  )
+}
+
+function setStrokeSize(size: 's' | 'm' | 'l' | 'xl') {
+  try { localStorage.setItem('canvas:size', size) } catch {}
+  const editor = (window as any).app?.editor || (document.querySelector('.tl-container') as any)?.__editor
+  const e = editor as { setStyleForNextShapes?: (style: any, value: any, opts?: any) => void } | null
+  const schema = (window as any).tldraw?.tlschema
+  if (e?.setStyleForNextShapes && schema) e.setStyleForNextShapes(schema.DefaultSizeStyle, size)
+}
+
+function setStrokeColor(color: string) {
+  try { localStorage.setItem('canvas:color', color) } catch {}
+  const editor = (window as any).app?.editor || (document.querySelector('.tl-container') as any)?.__editor
+  const e = editor as { setStyleForNextShapes?: (style: any, value: any, opts?: any) => void } | null
+  const schema = (window as any).tldraw?.tlschema
+  if (e?.setStyleForNextShapes && schema) e.setStyleForNextShapes(schema.DefaultColorStyle, color)
 }
