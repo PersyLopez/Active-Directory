@@ -10,6 +10,8 @@ const morgan = require('morgan');
 const pino = require('pino');
 const { z } = require('zod');
 const crypto = require('crypto');
+const { ensureDataFile, getRequests, addRequest, updateRequestById } = require('./store');
+const { sendNewRequestEmail, sendScheduleUpdateEmail } = require('./email');
 
 const app = express();
 
@@ -23,7 +25,13 @@ const logger = pino({
 
 const PORT = Number(process.env.PORT) || 3000;
 
-app.set('trust proxy', true);
+// Configure trust proxy safely; avoid permissive 'true'
+const TRUST_PROXY = process.env.TRUST_PROXY;
+if (TRUST_PROXY && /^\d+$/.test(TRUST_PROXY)) {
+  app.set('trust proxy', Number(TRUST_PROXY));
+} else {
+  app.set('trust proxy', 0);
+}
 
 app.use(
   helmet({
@@ -67,8 +75,11 @@ const apiLimiter = rateLimit({
 });
 app.use('/api/', apiLimiter);
 
-// Simple in-memory store for demo purposes
-const inMemoryRequests = [];
+// Initialize persistent store on startup
+ensureDataFile().catch((err) => {
+  logger.error({ err }, 'Failed to initialize data file');
+  process.exit(1);
+});
 
 // Health endpoints
 app.get('/healthz', (req, res) => {
@@ -112,7 +123,7 @@ const requestSchema = z.object({
   scheduledAt: z.string().optional(),
 });
 
-app.post('/api/requests', (req, res) => {
+app.post('/api/requests', async (req, res) => {
   const parseResult = requestSchema.safeParse(req.body);
   if (!parseResult.success) {
     return res.status(400).json({
@@ -133,10 +144,50 @@ app.post('/api/requests', (req, res) => {
     ...requestData,
   };
 
-  inMemoryRequests.push(record);
+  await addRequest(record);
   logger.info({ event: 'service_request_received', record });
-
+  try {
+    await sendNewRequestEmail(record);
+  } catch (err) {
+    logger.error({ err }, 'Failed to send new request email');
+  }
   return res.status(201).json({ requestId, status: 'received' });
+});
+
+// Simple token auth middleware for admin endpoints
+function requireAdmin(req, res, next) {
+  const token = req.get('x-admin-token') || req.query.token;
+  const expected = process.env.ADMIN_TOKEN || '';
+  if (!expected || token !== expected) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  next();
+}
+
+// Admin: list requests/events
+app.get('/api/admin/requests', requireAdmin, (req, res) => {
+  res.json({ items: getRequests() });
+});
+
+// Admin: set or update schedule time for a request
+const scheduleSchema = z.object({
+  scheduledAt: z.string().min(1),
+});
+
+app.post('/api/admin/requests/:id/schedule', requireAdmin, async (req, res) => {
+  const id = req.params.id;
+  const parse = scheduleSchema.safeParse(req.body);
+  if (!parse.success) {
+    return res.status(400).json({ error: 'Invalid body' });
+  }
+  const updated = await updateRequestById(id, { scheduledAt: parse.data.scheduledAt });
+  if (!updated) return res.status(404).json({ error: 'Not found' });
+  try {
+    await sendScheduleUpdateEmail(updated);
+  } catch (err) {
+    logger.error({ err }, 'Failed to send schedule update email');
+  }
+  res.json({ ok: true, item: updated });
 });
 
 // Static hosting

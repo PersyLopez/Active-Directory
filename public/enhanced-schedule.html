@@ -42,6 +42,11 @@
             <div class="form-field"><label>Vehicle Make</label><div id="summary-make"></div></div>
             <div class="form-field"><label>Vehicle Model</label><div id="summary-model"></div></div>
             <div class="form-field full"><label>Problem Description</label><div id="summary-problem"></div></div>
+            <div class="form-field full">
+              <label for="scheduledAt">Preferred Date & Time</label>
+              <input type="datetime-local" id="scheduledAt" />
+              <p class="field-error" id="error-scheduledAt" aria-live="polite"></p>
+            </div>
           </div>
           <div class="form-buttons">
             <a class="btn btn-secondary" href="/">← Back</a>

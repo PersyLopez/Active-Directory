@@ -56,6 +56,9 @@
       return;
     }
 
+    const scheduledAtInput = document.getElementById('scheduledAt');
+    const scheduledAt = scheduledAtInput && scheduledAtInput.value ? new Date(scheduledAtInput.value).toISOString() : undefined;
+
     const payload = {
       service,
       name: contact.name,
@@ -65,6 +68,7 @@
       vehicleMake: contact.vehicleMake || undefined,
       vehicleModel: contact.vehicleModel || undefined,
       problemDescription: contact.problemDescription || undefined,
+      scheduledAt,
     };
 
     try {
