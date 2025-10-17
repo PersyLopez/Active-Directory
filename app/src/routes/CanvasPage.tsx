@@ -1,10 +1,18 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Editor, Tldraw } from '@tldraw/tldraw'
 import '@tldraw/tldraw/tldraw.css'
 import html2canvas from 'html2canvas'
 
 export function CanvasPage() {
   const editorRef = useRef<Editor | null>(null)
+  const [autoStylus, setAutoStylus] = useState<boolean>(() => {
+    try {
+      const raw = localStorage.getItem('canvas:autoStylus')
+      return raw ? JSON.parse(raw) : true
+    } catch {
+      return true
+    }
+  })
 
   function handleMount(editor: Editor) {
     editorRef.current = editor
@@ -47,11 +55,49 @@ export function CanvasPage() {
     }
   }
 
+  useEffect(() => {
+    if (!autoStylus) return
+    const container = document.querySelector('.tl-container') as HTMLElement | null
+    if (!container) return
+    const onPointerDown = (e: PointerEvent) => {
+      const editor = editorRef.current as unknown as { setCurrentTool?: (id: string) => void; setCurrentToolId?: (id: string) => void } | null
+      if (!editor) return
+      const setTool = editor.setCurrentTool ?? editor.setCurrentToolId
+      if (!setTool) return
+      if (e.pointerType === 'pen') {
+        setTool('draw')
+      } else if (e.pointerType === 'touch') {
+        setTool('hand')
+      }
+    }
+    container.addEventListener('pointerdown', onPointerDown)
+    return () => {
+      container.removeEventListener('pointerdown', onPointerDown)
+    }
+  }, [autoStylus])
+
+  function toggleStylusMode(next: boolean) {
+    setAutoStylus(next)
+    try {
+      localStorage.setItem('canvas:autoStylus', JSON.stringify(next))
+    } catch {
+      // ignore
+    }
+  }
+
   return (
     <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ padding: 8, borderBottom: '1px solid #eee' }}>
+      <div style={{ padding: 8, borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', gap: 8 }}>
         <button onClick={exportPng}>Export PNG</button>
         <button onClick={ingestFromGraph} style={{ marginLeft: 8 }}>Ingest from Graph</button>
+        <label style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <input
+            type="checkbox"
+            checked={autoStylus}
+            onChange={e => toggleStylusMode(e.target.checked)}
+          />
+          Stylus mode (auto pen/hand)
+        </label>
       </div>
       <div style={{ flex: 1 }}>
         <Tldraw onMount={handleMount} />

@@ -30,6 +30,19 @@ body {
   min-height: 100vh;
 }
 
+/* Improve touch/stylus UX inside TLDraw canvas */
+.tl-container,
+.tl-canvas,
+.tl-foreground,
+.tl-page {
+  touch-action: none;
+  -ms-touch-action: none;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
