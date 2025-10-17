@@ -1,0 +1,33 @@
+{
+  "name": "workspace",
+  "version": "1.0.0",
+  "description": "<p align=\"center\">  <img src=\"https://i.imgur.com/pU5A58S.png\" alt=\"Microsoft Active Directory Logo\"/>  </p>",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon --watch server.js --watch public --ext js,html,css server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PersyLopez/Active-Directory.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PersyLopez/Active-Directory/issues"
+  },
+  "homepage": "https://github.com/PersyLopez/Active-Directory#readme",
+  "dependencies": {
+    "compression": "^1.8.1",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "morgan": "^1.10.1",
+    "pino": "^10.0.0",
+    "pino-pretty": "^13.1.2",
+    "zod": "^4.1.12"
+  }
+}

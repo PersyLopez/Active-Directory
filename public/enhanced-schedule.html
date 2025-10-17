@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Schedule & Submit Request - Fix&Go</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script defer src="/schedule.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <header class="header">
+    <nav class="nav-container" aria-label="Primary">
+      <div class="logo">
+        <h1 class="logo-text">🚨 Fix&Go Mobile Tire Service</h1>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="/">Home</a></li>
+        <li><a href="/enhanced-schedule.html" aria-current="page">Schedule</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="schedule-title">
+      <div class="hero-content">
+        <p class="emergency-badge">🚨 24/7 EMERGENCY SERVICE</p>
+        <h2 id="schedule-title" class="hero-title">Confirm Details & Submit</h2>
+        <p class="hero-subtitle">Review your information and submit your service request.</p>
+
+        <section class="contact-info-section" aria-labelledby="summary-title">
+          <h3 id="summary-title">Your Request Summary</h3>
+          <div class="contact-form">
+            <div class="form-field"><label>Selected Service</label><div id="summary-service"></div></div>
+            <div class="form-field"><label>Full Name</label><div id="summary-name"></div></div>
+            <div class="form-field"><label>Phone</label><div id="summary-phone"></div></div>
+            <div class="form-field"><label>Email</label><div id="summary-email"></div></div>
+            <div class="form-field"><label>Vehicle Year</label><div id="summary-year"></div></div>
+            <div class="form-field"><label>Vehicle Make</label><div id="summary-make"></div></div>
+            <div class="form-field"><label>Vehicle Model</label><div id="summary-model"></div></div>
+            <div class="form-field full"><label>Problem Description</label><div id="summary-problem"></div></div>
+          </div>
+          <div class="form-buttons">
+            <a class="btn btn-secondary" href="/">← Back</a>
+            <button type="button" id="submitRequest" class="btn btn-primary">Submit Request →</button>
+          </div>
+          <p class="field-error" id="submit-error" aria-live="polite"></p>
+          <p id="submit-success" style="color:#22c55e;font-weight:700;"></p>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-bottom">
+      <p>&copy; 2024 Fix&Go Mobile Tire Service.</p>
+    </div>
+  </footer>
+</body>
+</html>
