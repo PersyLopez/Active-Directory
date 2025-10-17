@@ -13,6 +13,16 @@ export function CanvasPage() {
       return true
     }
   })
+  const [palmRejection, setPalmRejection] = useState<boolean>(() => {
+    try {
+      const raw = localStorage.getItem('canvas:palmRejection')
+      return raw ? JSON.parse(raw) : true
+    } catch {
+      return true
+    }
+  })
+  const activePenIdRef = useRef<number | null>(null)
+  const lastPenUpAtRef = useRef<number>(0)
 
   function handleMount(editor: Editor) {
     editorRef.current = editor
@@ -56,30 +66,74 @@ export function CanvasPage() {
   }
 
   useEffect(() => {
-    if (!autoStylus) return
     const container = document.querySelector('.tl-container') as HTMLElement | null
     if (!container) return
-    const onPointerDown = (e: PointerEvent) => {
+
+    const maybeSwitchTool = (e: PointerEvent) => {
+      if (!autoStylus) return
       const editor = editorRef.current as unknown as { setCurrentTool?: (id: string) => void; setCurrentToolId?: (id: string) => void } | null
       if (!editor) return
       const setTool = editor.setCurrentTool ?? editor.setCurrentToolId
       if (!setTool) return
-      if (e.pointerType === 'pen') {
-        setTool('draw')
-      } else if (e.pointerType === 'touch') {
-        setTool('hand')
+      if (e.pointerType === 'pen') setTool('draw')
+      else if (e.pointerType === 'touch') setTool('hand')
+    }
+
+    const blockIfPalm = (e: PointerEvent) => {
+      if (!palmRejection) return
+      const isTouch = e.pointerType === 'touch'
+      const penActive = activePenIdRef.current !== null
+      const withinGrace = Date.now() - lastPenUpAtRef.current < 120
+      if (isTouch && (penActive || withinGrace)) {
+        e.preventDefault()
+        e.stopImmediatePropagation?.()
+        e.stopPropagation()
       }
     }
-    container.addEventListener('pointerdown', onPointerDown)
-    return () => {
-      container.removeEventListener('pointerdown', onPointerDown)
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (e.pointerType === 'pen') {
+        activePenIdRef.current = e.pointerId
+      }
+      blockIfPalm(e)
+      maybeSwitchTool(e)
     }
-  }, [autoStylus])
+    const onPointerMove = (e: PointerEvent) => {
+      blockIfPalm(e)
+    }
+    const onPointerUpOrCancel = (e: PointerEvent) => {
+      if (e.pointerId === activePenIdRef.current) {
+        activePenIdRef.current = null
+        lastPenUpAtRef.current = Date.now()
+      }
+    }
+
+    // Capture early to intercept before TLDraw; passive must be false to call preventDefault
+    container.addEventListener('pointerdown', onPointerDown, { capture: true, passive: false })
+    container.addEventListener('pointermove', onPointerMove, { capture: true, passive: false })
+    window.addEventListener('pointerup', onPointerUpOrCancel, { capture: true })
+    window.addEventListener('pointercancel', onPointerUpOrCancel, { capture: true })
+    return () => {
+      container.removeEventListener('pointerdown', onPointerDown, { capture: true } as EventListenerOptions)
+      container.removeEventListener('pointermove', onPointerMove, { capture: true } as EventListenerOptions)
+      window.removeEventListener('pointerup', onPointerUpOrCancel, { capture: true } as EventListenerOptions)
+      window.removeEventListener('pointercancel', onPointerUpOrCancel, { capture: true } as EventListenerOptions)
+    }
+  }, [autoStylus, palmRejection])
 
   function toggleStylusMode(next: boolean) {
     setAutoStylus(next)
     try {
       localStorage.setItem('canvas:autoStylus', JSON.stringify(next))
+    } catch {
+      // ignore
+    }
+  }
+
+  function togglePalmRejection(next: boolean) {
+    setPalmRejection(next)
+    try {
+      localStorage.setItem('canvas:palmRejection', JSON.stringify(next))
     } catch {
       // ignore
     }
@@ -97,6 +151,14 @@ export function CanvasPage() {
             onChange={e => toggleStylusMode(e.target.checked)}
           />
           Stylus mode (auto pen/hand)
+        </label>
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <input
+            type="checkbox"
+            checked={palmRejection}
+            onChange={e => togglePalmRejection(e.target.checked)}
+          />
+          Strict palm rejection
         </label>
       </div>
       <div style={{ flex: 1 }}>
