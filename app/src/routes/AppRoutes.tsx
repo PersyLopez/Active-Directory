@@ -5,6 +5,7 @@ import { CanvasPage } from './CanvasPage'
 import { PageMode } from './PageMode'
 import { GraphPage } from './GraphPage'
 import { QuizPage } from './QuizPage'
+import { StudyPage } from './StudyPage'
 
 const router = createBrowserRouter([
   { path: '/', element: <Home /> },
@@ -12,6 +13,7 @@ const router = createBrowserRouter([
   { path: '/pages', element: <PageMode /> },
   { path: '/graph', element: <GraphPage /> },
   { path: '/quiz', element: <QuizPage /> },
+  { path: '/study', element: <StudyPage /> },
 ])
 
 export function AppRoutes() {

@@ -33,6 +33,7 @@ export function Home() {
             <Link to="/canvas">Canvas</Link>
             <Link to="/graph">Graph</Link>
             <Link to="/quiz">Quiz</Link>
+            <Link to="/study">Study</Link>
           </div>
         </div>
         <button onClick={() => createNote('Untitled')}>New Note</button>
