@@ -23,9 +23,18 @@ export function CanvasPage() {
   })
   const activePenIdRef = useRef<number | null>(null)
   const lastPenUpAtRef = useRef<number>(0)
+  const [marquee, setMarquee] = useState<boolean>(() => {
+    try {
+      const raw = localStorage.getItem('canvas:marquee')
+      return raw ? JSON.parse(raw) : false
+    } catch {
+      return false
+    }
+  })
 
   function handleMount(editor: Editor) {
     editorRef.current = editor
+    try { (window as any).app = { ...(window as any).app, editor } } catch {}
     // Restore style preferences
     try {
       const storedColor = localStorage.getItem('canvas:color')
@@ -94,6 +103,7 @@ export function CanvasPage() {
       // Don't override if user has explicitly selected a non-draw/hand tool recently
       const explicit = getStored('canvas:explicitTool', '')
       if (explicit && explicit !== 'draw' && explicit !== 'hand') return
+      if (marquee) { setTool('select'); return }
       if (e.pointerType === 'pen') setTool('draw')
       else if (e.pointerType === 'touch') setTool('hand')
     }
@@ -138,7 +148,7 @@ export function CanvasPage() {
       window.removeEventListener('pointerup', onPointerUpOrCancel, { capture: true } as EventListenerOptions)
       window.removeEventListener('pointercancel', onPointerUpOrCancel, { capture: true } as EventListenerOptions)
     }
-  }, [autoStylus, palmRejection])
+  }, [autoStylus, palmRejection, marquee])
 
   function toggleStylusMode(next: boolean) {
     setAutoStylus(next)
@@ -153,6 +163,20 @@ export function CanvasPage() {
     setPalmRejection(next)
     try {
       localStorage.setItem('canvas:palmRejection', JSON.stringify(next))
+    } catch {
+      // ignore
+    }
+  }
+
+  function toggleMarquee(next: boolean) {
+    setMarquee(next)
+    try {
+      localStorage.setItem('canvas:marquee', JSON.stringify(next))
+      if (next) {
+        localStorage.setItem('canvas:explicitTool', 'select')
+        const editor = editorRef.current as unknown as { setCurrentTool?: (id: string) => void } | null
+        editor?.setCurrentTool?.('select')
+      }
     } catch {
       // ignore
     }
@@ -187,6 +211,13 @@ export function CanvasPage() {
             <input type="color" defaultValue={getStored('canvas:color', '#1f2937')} onChange={e => setStrokeColor(e.target.value)} />
           </label>
         </div>
+        {/* Presets */}
+        <div style={{ display: 'inline-flex', gap: 6, marginLeft: 12, alignItems: 'center' }}>
+          <span>Presets:</span>
+          <button onClick={() => applyPreset('HB')}>HB</button>
+          <button onClick={() => applyPreset('2B')}>2B</button>
+          <button onClick={() => applyPreset('Highlighter')}>Highlighter</button>
+        </div>
         <label style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
           <input
             type="checkbox"
@@ -202,6 +233,14 @@ export function CanvasPage() {
             onChange={e => togglePalmRejection(e.target.checked)}
           />
           Strict palm rejection
+        </label>
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <input
+            type="checkbox"
+            checked={marquee}
+            onChange={e => toggleMarquee(e.target.checked)}
+          />
+          Marquee select
         </label>
       </div>
       <div style={{ flex: 1 }}>
@@ -246,4 +285,28 @@ function setStrokeColor(color: string) {
   const e = editor as { setStyleForNextShapes?: (style: any, value: any, opts?: any) => void } | null
   const schema = (window as any).tldraw?.tlschema
   if (e?.setStyleForNextShapes && schema) e.setStyleForNextShapes(schema.DefaultColorStyle, color)
+}
+
+function applyPreset(name: 'HB' | '2B' | 'Highlighter') {
+  const schema = (window as any).tldraw?.tlschema
+  const editor = (window as any).app?.editor || (document.querySelector('.tl-container') as any)?.__editor
+  const e = editor as { setCurrentTool?: (id: string) => void; setStyleForNextShapes?: (style: any, value: any, opts?: any) => void } | null
+  if (!schema || !e?.setStyleForNextShapes) return
+
+  if (name === 'HB') {
+    setStrokeSize('s')
+    setStrokeColor('#111827')
+    e.setCurrentTool?.('draw')
+    try { localStorage.setItem('canvas:explicitTool', 'draw') } catch {}
+  } else if (name === '2B') {
+    setStrokeSize('l')
+    setStrokeColor('#111827')
+    e.setCurrentTool?.('draw')
+    try { localStorage.setItem('canvas:explicitTool', 'draw') } catch {}
+  } else if (name === 'Highlighter') {
+    setStrokeSize('xl')
+    setStrokeColor('#fde047')
+    e.setCurrentTool?.('highlight')
+    try { localStorage.setItem('canvas:explicitTool', 'highlight') } catch {}
+  }
 }
