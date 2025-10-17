@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin - Content Editor</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script defer src="/admin-content.js"></script>
+  <style>
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+    .form-grid .full { grid-column: 1 / -1; }
+    .field { display:flex; flex-direction:column; gap:0.25rem; }
+    .field input, .field textarea { padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; }
+    .actions { margin-top: 1rem; display:flex; gap:0.5rem; }
+    .actions button { padding: 0.6rem 0.9rem; border-radius: 0.5rem; border:0; background:#3b82f6; color:white; font-weight:700; }
+    .notice { margin-top:0.5rem; font-weight:700; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <nav class="nav-container" aria-label="Admin">
+      <div class="logo">
+        <h1 class="logo-text">📝 Admin Content - Fix&Go</h1>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="/">Home</a></li>
+        <li><a href="/admin.html">Admin Calendar</a></li>
+        <li><a href="/admin-content.html" aria-current="page">Admin Content</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="services-overview" aria-labelledby="editor-title">
+      <div class="services-container">
+        <h3 id="editor-title">Edit Public Site Content</h3>
+        <div class="field">
+          <label>Admin Token</label>
+          <input id="token" type="password" placeholder="enter admin token" />
+        </div>
+        <div class="form-grid">
+          <div class="field full"><label>Meta Title</label><input id="metaTitle" /></div>
+          <div class="field full"><label>Meta Description</label><textarea id="metaDescription" rows="2"></textarea></div>
+          <div class="field full"><label>Site Name</label><input id="siteName" /></div>
+          <div class="field full"><label>Hero Title</label><input id="heroTitle" /></div>
+          <div class="field full"><label>Hero Subtitle</label><textarea id="heroSubtitle" rows="3"></textarea></div>
+          <div class="field full"><label>Emergency CTA Heading</label><input id="emergencyCtaHeading" /></div>
+          <div class="field full"><label>Emergency CTA Text</label><textarea id="emergencyCtaText" rows="2"></textarea></div>
+          <div class="field full"><label>Services Overview Title</label><input id="servicesOverviewTitle" /></div>
+          <div class="field full"><label>About Text</label><textarea id="aboutText" rows="3"></textarea></div>
+          <div class="field"><label>Contact Title</label><input id="contactTitle" /></div>
+          <div class="field"><label>Phone Digits</label><input id="phoneDigits" /></div>
+          <div class="field"><label>Phone Display</label><input id="phoneDisplay" /></div>
+          <div class="field"><label>Email</label><input id="email" /></div>
+        </div>
+        <div class="actions">
+          <button id="loadBtn">Load Current</button>
+          <button id="saveBtn">Save Changes</button>
+        </div>
+        <div class="notice" id="notice"></div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

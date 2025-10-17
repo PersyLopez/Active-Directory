@@ -12,6 +12,7 @@ const { z } = require('zod');
 const crypto = require('crypto');
 const { ensureDataFile, getRequests, addRequest, updateRequestById } = require('./store');
 const { sendNewRequestEmail, sendScheduleUpdateEmail } = require('./email');
+const { ensureContentFile, getContent, updateContent } = require('./contentStore');
 
 const app = express();
 
@@ -75,9 +76,13 @@ const apiLimiter = rateLimit({
 });
 app.use('/api/', apiLimiter);
 
-// Initialize persistent store on startup
+// Initialize persistent stores on startup
 ensureDataFile().catch((err) => {
   logger.error({ err }, 'Failed to initialize data file');
+  process.exit(1);
+});
+ensureContentFile().catch((err) => {
+  logger.error({ err }, 'Failed to initialize content file');
   process.exit(1);
 });
 
@@ -188,6 +193,30 @@ app.post('/api/admin/requests/:id/schedule', requireAdmin, async (req, res) => {
     logger.error({ err }, 'Failed to send schedule update email');
   }
   res.json({ ok: true, item: updated });
+});
+
+// Public content endpoint
+app.get('/api/content', (req, res) => {
+  res.json(getContent());
+});
+
+// Admin content endpoints
+app.get('/api/admin/content', requireAdmin, (req, res) => {
+  res.json(getContent());
+});
+
+app.post('/api/admin/content', requireAdmin, async (req, res) => {
+  // Accept partial object of string values; filtering is handled in contentStore
+  if (!req.body || typeof req.body !== 'object') {
+    return res.status(400).json({ error: 'Invalid body' });
+  }
+  try {
+    const updated = await updateContent(req.body);
+    res.json(updated);
+  } catch (err) {
+    logger.error({ err }, 'Failed to update content');
+    res.status(500).json({ error: 'Failed to update content' });
+  }
 });
 
 // Static hosting
