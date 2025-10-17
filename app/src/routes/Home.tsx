@@ -37,10 +37,10 @@ export function Home() {
           </div>
         </div>
         <button onClick={() => createNote('Untitled')}>New Note</button>
-        <ul>
+        <ul role="list">
           {state.notes.map(n => (
             <li key={n.id}>
-              <button onClick={() => setSelectedId(n.id)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+              <button aria-label={`Open note ${n.title}`} onClick={() => setSelectedId(n.id)} style={{ background: 'none', border: '1px solid transparent', cursor: 'pointer' }} onFocus={e => (e.currentTarget.style.border = '1px solid #999')} onBlur={e => (e.currentTarget.style.border = '1px solid transparent')}>
                 {n.title}
               </button>
             </li>
