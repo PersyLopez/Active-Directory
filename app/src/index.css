@@ -30,6 +30,64 @@ body {
   min-height: 100vh;
 }
 
+/* Improve touch/stylus UX inside TLDraw canvas */
+.tl-container,
+.tl-canvas,
+.tl-foreground,
+.tl-page {
+  touch-action: none;
+  -ms-touch-action: none;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Grid overlay styles */
+.tl-grid { opacity: var(--grid-opacity, 0.9); }
+.tl-grid-dot { fill: var(--grid-color, var(--tl-color-grid)); }
+
+/* Simulate line / isometric grids using background when selected */
+/* We can't change TLDraw's internal dot grid directly, so add an overlay */
+.tl-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 149; /* slightly below tl-grid default 150 to not block */
+  background: none;
+}
+
+/* Lines 16 */
+:root[style*="--grid-mode:lines-16"] .tl-container::before {
+  background-image: linear-gradient(to right, color-mix(in oklab, var(--grid-color, rgba(0,0,0,0.7)) 30%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--grid-color, rgba(0,0,0,0.7)) 30%, transparent) 1px, transparent 1px);
+  background-size: 16px 16px;
+  opacity: var(--grid-opacity, 0.9);
+}
+
+/* Lines 32 */
+:root[style*="--grid-mode:lines-32"] .tl-container::before {
+  background-image: linear-gradient(to right, color-mix(in oklab, var(--grid-color, rgba(0,0,0,0.7)) 30%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--grid-color, rgba(0,0,0,0.7)) 30%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: var(--grid-opacity, 0.9);
+}
+
+/* Isometric 16 */
+:root[style*="--grid-mode:isometric-16"] .tl-container::before {
+  background-image: linear-gradient(30deg, color-mix(in oklab, var(--grid-color, rgba(0,0,0,0.7)) 25%, transparent) 1px, transparent 1px),
+    linear-gradient(150deg, color-mix(in oklab, var(--grid-color, rgba(0,0,0,0.7)) 25%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--grid-color, rgba(0,0,0,0.7)) 18%, transparent) 1px, transparent 1px);
+  background-size: 16px 28px, 16px 28px, 16px 16px;
+  opacity: var(--grid-opacity, 0.9);
+}
+
+/* Off - clear overlay */
+:root[style*="--grid-mode:off"] .tl-container::before {
+  background: none;
+}
+
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
