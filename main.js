@@ -122,7 +122,7 @@
     return valid;
   }
 
-  function proceedToSchedule() {
+  async function proceedToSchedule() {
     if (!selectedService) {
       // pull from storage if available
       selectedService = sessionStorage.getItem(STORAGE_KEYS.selectedService) || '';
@@ -139,9 +139,92 @@
     const contact = readFormData();
     sessionStorage.setItem(STORAGE_KEYS.contact, JSON.stringify(contact));
 
-    updateProgress(3);
-    // Do not leak PII in URL — navigate without params
-    window.location.href = 'enhanced-schedule.html';
+    // Show loading state
+    const continueBtn = qs(SELECTORS.continueButton);
+    if (continueBtn) {
+      continueBtn.textContent = 'Submitting...';
+      continueBtn.disabled = true;
+    }
+
+    try {
+      // Submit service request to backend
+      const serviceRequest = {
+        service: selectedService,
+        ...contact,
+        timestamp: new Date().toISOString()
+      };
+
+      const response = await fetch('http://192.168.1.29:8081/api/service-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(serviceRequest)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Show success message
+        showSuccessMessage(result.message, result.requestId);
+        updateProgress(3);
+        
+        // Clear form data after successful submission
+        sessionStorage.removeItem(STORAGE_KEYS.selectedService);
+        sessionStorage.removeItem(STORAGE_KEYS.contact);
+      } else {
+        throw new Error(result.message || 'Failed to submit service request');
+      }
+
+    } catch (error) {
+      console.error('Error submitting service request:', error);
+      showErrorMessage('Failed to submit service request. Please try again or call us directly at (555) 123-4567');
+    } finally {
+      // Reset button state
+      if (continueBtn) {
+        continueBtn.textContent = 'Continue to Schedule →';
+        continueBtn.disabled = false;
+      }
+    }
+  }
+
+  function showSuccessMessage(message, requestId) {
+    // Create success message element
+    const successDiv = document.createElement('div');
+    successDiv.className = 'success-message';
+    successDiv.innerHTML = `
+      <div style="background: #d4edda; color: #155724; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0; border: 1px solid #c3e6cb;">
+        <h4>✅ Service Request Submitted Successfully!</h4>
+        <p>${message}</p>
+        <p><strong>Request ID:</strong> ${requestId}</p>
+        <p>We'll contact you shortly to confirm your service appointment.</p>
+        <p><strong>Emergency Line:</strong> <a href="tel:5551234567">(555) 123-4567</a></p>
+      </div>
+    `;
+    
+    // Insert after the contact form
+    const contactSection = qs(SELECTORS.contactSection);
+    if (contactSection) {
+      contactSection.appendChild(successDiv);
+    }
+  }
+
+  function showErrorMessage(message) {
+    // Create error message element
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.innerHTML = `
+      <div style="background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0; border: 1px solid #f5c6cb;">
+        <h4>❌ Error</h4>
+        <p>${message}</p>
+      </div>
+    `;
+    
+    // Insert after the contact form
+    const contactSection = qs(SELECTORS.contactSection);
+    if (contactSection) {
+      contactSection.appendChild(errorDiv);
+    }
   }
 
   function restoreFromStorage() {

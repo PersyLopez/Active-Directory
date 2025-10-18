@@ -1,0 +1,33 @@
+{
+  "name": "fixgo-mobile-tire-service",
+  "version": "1.0.0",
+  "description": "Fix&Go Mobile Tire Service - 24/7 Emergency Auto Repair",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step needed for static site'",
+    "start": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.7"
+  },
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  },
+  "keywords": [
+    "mobile",
+    "tire",
+    "service",
+    "emergency",
+    "auto",
+    "repair",
+    "vercel",
+    "serverless"
+  ],
+  "author": "Fix&Go Mobile Tire Service",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
