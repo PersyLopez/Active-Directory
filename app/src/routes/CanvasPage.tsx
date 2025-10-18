@@ -222,6 +222,18 @@ export function CanvasPage() {
             <option value="lines-32">Lines 32</option>
             <option value="isometric-16">Isometric 16</option>
           </select>
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            Snap
+            <input type="checkbox" defaultChecked={getStored('canvas:gridSnap', 'false') === 'true'} onChange={e => setGridSnap(e.target.checked)} />
+          </label>
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            Grid color
+            <input type="color" defaultValue={getStored('canvas:gridColor', '#6b7280')} onChange={e => setGridColor(e.target.value)} />
+          </label>
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            Opacity
+            <input type="range" min={10} max={100} defaultValue={getStored('canvas:gridOpacity', '90')} onChange={e => setGridOpacity(Number(e.target.value))} />
+          </label>
         </div>
         {/* Presets */}
         <div style={{ display: 'inline-flex', gap: 6, marginLeft: 12, alignItems: 'center' }}>
@@ -318,6 +330,26 @@ function setGrid(value: string) {
   // Visual style via CSS variables overlay
   const root = document.documentElement
   root.style.setProperty('--grid-mode', value)
+}
+
+function setGridSnap(enabled: boolean) {
+  try { localStorage.setItem('canvas:gridSnap', String(enabled)) } catch {}
+  const editor = (window as any).app?.editor as
+    | (Editor & { updateInstanceState?: (partial: any) => void })
+    | undefined
+  editor?.updateInstanceState?.({ isGridMode: enabled })
+}
+
+function setGridColor(color: string) {
+  try { localStorage.setItem('canvas:gridColor', color) } catch {}
+  const root = document.documentElement
+  root.style.setProperty('--grid-color', color)
+}
+
+function setGridOpacity(value: number) {
+  try { localStorage.setItem('canvas:gridOpacity', String(value)) } catch {}
+  const root = document.documentElement
+  root.style.setProperty('--grid-opacity', (value / 100).toString())
 }
 
 function applyPreset(name: 'HB' | '2B' | 'Highlighter') {

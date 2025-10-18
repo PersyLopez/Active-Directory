@@ -44,10 +44,8 @@ body {
 }
 
 /* Grid overlay styles */
-.tl-grid {
-  /* default color already defined by tldraw; we tweak opacity a bit */
-  opacity: 0.9;
-}
+.tl-grid { opacity: var(--grid-opacity, 0.9); }
+.tl-grid-dot { fill: var(--grid-color, var(--tl-color-grid)); }
 
 /* Simulate line / isometric grids using background when selected */
 /* We can't change TLDraw's internal dot grid directly, so add an overlay */
@@ -62,24 +60,27 @@ body {
 
 /* Lines 16 */
 :root[style*="--grid-mode:lines-16"] .tl-container::before {
-  background-image: linear-gradient(to right, rgba(0,0,0,0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0,0,0,0.08) 1px, transparent 1px);
+  background-image: linear-gradient(to right, color-mix(in oklab, var(--grid-color, rgba(0,0,0,0.7)) 30%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--grid-color, rgba(0,0,0,0.7)) 30%, transparent) 1px, transparent 1px);
   background-size: 16px 16px;
+  opacity: var(--grid-opacity, 0.9);
 }
 
 /* Lines 32 */
 :root[style*="--grid-mode:lines-32"] .tl-container::before {
-  background-image: linear-gradient(to right, rgba(0,0,0,0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0,0,0,0.08) 1px, transparent 1px);
+  background-image: linear-gradient(to right, color-mix(in oklab, var(--grid-color, rgba(0,0,0,0.7)) 30%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--grid-color, rgba(0,0,0,0.7)) 30%, transparent) 1px, transparent 1px);
   background-size: 32px 32px;
+  opacity: var(--grid-opacity, 0.9);
 }
 
 /* Isometric 16 */
 :root[style*="--grid-mode:isometric-16"] .tl-container::before {
-  background-image: linear-gradient(30deg, rgba(0,0,0,0.06) 1px, transparent 1px),
-    linear-gradient(150deg, rgba(0,0,0,0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+  background-image: linear-gradient(30deg, color-mix(in oklab, var(--grid-color, rgba(0,0,0,0.7)) 25%, transparent) 1px, transparent 1px),
+    linear-gradient(150deg, color-mix(in oklab, var(--grid-color, rgba(0,0,0,0.7)) 25%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--grid-color, rgba(0,0,0,0.7)) 18%, transparent) 1px, transparent 1px);
   background-size: 16px 28px, 16px 28px, 16px 16px;
+  opacity: var(--grid-opacity, 0.9);
 }
 
 /* Off - clear overlay */
